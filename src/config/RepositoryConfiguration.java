@@ -1,6 +1,7 @@
 package config;
 
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class RepositoryConfiguration {
 
@@ -8,6 +9,8 @@ public class RepositoryConfiguration {
     private final Path pathToDataStore;
 
     public RepositoryConfiguration(Path pathToDataStore) {
+        Objects.requireNonNull(pathToDataStore);
+
         this.pathToDataStore = pathToDataStore;
     }
 

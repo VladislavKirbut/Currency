@@ -18,11 +18,9 @@ public class CurrencyRate {
      * Currency purchase rate
      */
     private final BigDecimal purchaseRate;
-
     public CurrencyRate(BigDecimal sellingRate, Currency currency, BigDecimal purchaseRate) {
-        if (sellingRate.compareTo(BigDecimal.ZERO) <= 0 || currency == null || purchaseRate.compareTo(BigDecimal.ZERO) <= 0) {
+        if (sellingRate.compareTo(BigDecimal.ZERO) <= 0 || currency == null || purchaseRate.compareTo(BigDecimal.ZERO) <= 0)
             throw new IllegalArgumentException("Incorrect parameters of constructor.");
-        }
 
         this.sellingRate = sellingRate;
         this.currency = currency;
