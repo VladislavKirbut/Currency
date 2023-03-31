@@ -1,9 +1,8 @@
 import config.RepositoryConfiguration;
-import controller.ExchangeRateController;
+import controller.CurrencyRateConsoleController;
 import model.LocalCurrency;
 import repository.CurrencyRepository;
-import service.CurrencyService;
-
+import service.CurrencyRateService;
 import java.nio.file.Path;
 import java.util.Currency;
 import java.util.List;
@@ -13,11 +12,11 @@ public class Application {
         Currency envCurrency = Currency.getInstance(System.getenv("LOCAL_CURRENCY_CODE"));
         LocalCurrency localCurrency = new LocalCurrency(envCurrency);
 
-        Path pathToDataStore = Path.of("data", "exchange_rate");
+        Path pathToDataStore = Path.of(System.getenv("DATA_STORE_PATH"));
         RepositoryConfiguration configuration = new RepositoryConfiguration(pathToDataStore);
         CurrencyRepository repository = new CurrencyRepository(configuration);
-        CurrencyService service = new CurrencyService(repository);
-        ExchangeRateController controller = new ExchangeRateController(service, localCurrency);
+        CurrencyRateService service = new CurrencyRateService(repository);
+        CurrencyRateConsoleController controller = new CurrencyRateConsoleController(service, localCurrency);
 
         if (args.length > 1) {
             String command = args[0];

@@ -3,7 +3,7 @@ package controller;
 import exceptions.*;
 import model.CurrencyRate;
 import model.LocalCurrency;
-import service.CurrencyService;
+import service.CurrencyRateService;
 
 import java.math.BigDecimal;
 import java.util.Currency;
@@ -11,13 +11,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public class ExchangeRateController {
-    private final static int PUT_EXCHANGE_MAX_ARGUMENTS = 4;
-    private final CurrencyService service;
-
+public class CurrencyRateConsoleController implements CurrencyRateController {
+    /**
+     * Maximum number of arguments in the putExchangeRate command
+     */
+    private final static int PUT_RATE_MAX_ARGUMENTS = 4;
+    private final CurrencyRateService service;
     private final LocalCurrency localCurrency;
 
-    public ExchangeRateController(CurrencyService service, LocalCurrency localCurrency) {
+    public CurrencyRateConsoleController(CurrencyRateService service, LocalCurrency localCurrency) {
         Objects.requireNonNull(service);
         Objects.requireNonNull(localCurrency);
 
@@ -25,10 +27,11 @@ public class ExchangeRateController {
         this.localCurrency = localCurrency;
     }
 
+    @Override
     public void run(String command, List<String> argumentsList) {
         try {
             switch (command) {
-                case "admin/putExchangeRate" -> putExchangeRate(argumentsList);
+                case "admin/putExchangeRate" -> putRate(argumentsList);
                 default -> throw new UnknownCommandException("Неизвестная команда");
             }
         } catch (ApplicationException ex) {
@@ -38,8 +41,12 @@ public class ExchangeRateController {
         }
     }
 
-    private void putExchangeRate(List<String> argumentsList) {
-        if (argumentsList.size() != PUT_EXCHANGE_MAX_ARGUMENTS)
+    /**
+     * Gets a list of arguments and creates a CurrencyRate model.
+     * Then add it to a file with a specific date.
+     */
+    private void putRate(List<String> argumentsList) {
+        if (argumentsList.size() != PUT_RATE_MAX_ARGUMENTS)
             throw new IncorrectCommandFormatException("Неверный формат команды");
 
         if (!isDateFormatValid(argumentsList.get(0)))
@@ -51,8 +58,11 @@ public class ExchangeRateController {
         isPurchaseRateValid(argumentsList.get(2));
         isSellingRateValid(argumentsList.get(3));
 
-        service.saveExchangeRate(argumentsList.get(0), new CurrencyRate(new BigDecimal(argumentsList.get(3)),
-                Currency.getInstance(argumentsList.get(1)), new BigDecimal(argumentsList.get(2))));
+        service.saveExchangeRate(argumentsList.get(0),
+                                 new CurrencyRate(Currency.getInstance(argumentsList.get(1)),
+                                 new BigDecimal(argumentsList.get(3)),
+                                 new BigDecimal(argumentsList.get(2)))
+        );
 
         System.out.println("Запись сохранена");
     }
@@ -62,12 +72,13 @@ public class ExchangeRateController {
     }
 
     private boolean isCurrencyValid(String currency) {
-        if (Currency.getInstance(currency).equals(localCurrency.getLocalCurrency()))
+
+        if (currency.equals(localCurrency.getLocalCurrency().getCurrencyCode()))
             throw new LocalCurrencyException("Местная валюта");
 
         Set<Currency> setOfCurrency = Currency.getAvailableCurrencies();
         for (Currency currencyElem : setOfCurrency) {
-            if (currencyElem.equals(Currency.getInstance(currency)))
+            if (currencyElem.getCurrencyCode().equals(currency))
                 return true;
         }
 
@@ -78,14 +89,15 @@ public class ExchangeRateController {
         if (purchaseRate.trim().charAt(0) == '-')
             throw new ExchangeRateValueException("Неверное значение курса покупки");
 
-        if (!purchaseRate.matches("\\d+(\\.)?\\d+"))
+        if (!purchaseRate.matches("\\d+(\\.\\d+)?"))
             throw new ExchangeRateFormatException("Неверный формат курса покупки");
     }
+
     private void isSellingRateValid(String sellingRate) {
         if (sellingRate.trim().charAt(0) == '-')
             throw new ExchangeRateValueException("Неверное значение курса продажи");
 
-        if (!sellingRate.matches("\\d+(\\.)?\\d+"))
+        if (!sellingRate.matches("\\d+(\\.\\d+)?"))
             throw new ExchangeRateFormatException("Неверный формат курса продажи");
     }
 }
