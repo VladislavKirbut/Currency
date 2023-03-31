@@ -12,15 +12,15 @@ import java.util.Objects;
 import java.util.Set;
 
 public class CurrencyRateConsoleController implements CurrencyRateController {
-    /**
-     * Maximum number of arguments in the putExchangeRate command
-     */
+
+    /**Maximum number of arguments in the putExchangeRate command */
     private final static int PUT_RATE_MAX_ARGUMENTS = 4;
 
-    /**
-     * Maximum number of arguments in the removeExchangeRate command
-     */
+    /** Maximum number of arguments in the removeExchangeRate command */
     private final static int REMOVE_RATE_MAX_ARGUMENTS = 2;
+
+    /** Maximum number of arguments in the listExchangeRates command */
+    private final static int GET_LIST_MAX_ARGUMENTS = 1;
     private final CurrencyRateService service;
     private final LocalCurrency localCurrency;
 
@@ -38,6 +38,7 @@ public class CurrencyRateConsoleController implements CurrencyRateController {
             switch (command) {
                 case "admin/putExchangeRate" -> putRate(argumentsList);
                 case "admin/removeExchangeRate" -> removeRate(argumentsList);
+                case "listExchangeRates" -> getListExchangeRate(argumentsList);
                 default -> throw new UnknownCommandException("Неизвестная команда");
             }
         } catch (ApplicationException ex) {
@@ -89,7 +90,23 @@ public class CurrencyRateConsoleController implements CurrencyRateController {
         if (service.removeExchangeRate(argumentsList.get(0), argumentsList.get(1)))
             System.out.println("Успешное удаление");
         else System.out.println("Записи не существует");
+    }
 
+    /**
+     * Gets a list of currency rates from a file and outputs it
+     */
+    private void getListExchangeRate(List<String> argumentsList) {
+        if (argumentsList.size() != GET_LIST_MAX_ARGUMENTS)
+            throw new IncorrectCommandFormatException("Неверный формат команды");
+
+        if (!isDateFormatValid(argumentsList.get(0)))
+            throw new InvalidDateFormatException("Неверный формат даты");
+
+        List<CurrencyRate> exchangeRateList = service.getList(argumentsList.get(0));
+
+        if (exchangeRateList.size() == 0)
+            System.out.println("Данные отсутствуют");
+        else printRates(exchangeRateList);
     }
 
     private boolean isDateFormatValid(String date) {
@@ -124,5 +141,19 @@ public class CurrencyRateConsoleController implements CurrencyRateController {
 
         if (!sellingRate.matches("\\d+(\\.\\d+)?"))
             throw new ExchangeRateFormatException("Неверный формат курса продажи");
+    }
+
+    /**
+     * Outputs all exchange rates to console
+     */
+    private void printRates(List<CurrencyRate> currencyRateList) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%-10s %-10s %s\n", "Валюта", "Покупка", "Продажа"));
+        for (CurrencyRate currency : currencyRateList) {
+            sb.append(String.format("%-10s %-10.3s %.3s\n", currency.getCurrency(), currency.getPurchaseRate(),
+                             currency.getSellingRate()));
+        }
+
+        System.out.println(sb);
     }
 }

@@ -43,6 +43,15 @@ public class CurrencyRateService implements RateService {
     }
 
     /**
+     * Returns a list of exchange rates
+     */
+    @Override
+    public List<CurrencyRate> getList(String date) {
+        currencyRateList = repository.getExchangeRate(date);
+        return currencyRateList;
+    }
+
+    /**
      * The method will replace CurrencyRate if it exists.
      * Otherwise, it will add the currency exchange rate to the list.
      */

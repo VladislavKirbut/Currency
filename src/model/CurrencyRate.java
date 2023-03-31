@@ -39,6 +39,7 @@ public class CurrencyRate {
     public int hashCode() {
         return Objects.hash(sellingRate, currency, purchaseRate);
     }
+
     public BigDecimal getSellingRate() {
         return sellingRate;
     }
