@@ -18,11 +18,28 @@ public class CurrencyRateService implements RateService {
         this.repository = repository;
     }
 
+    /**
+     * Extracts currencies from a file.
+     * Replace specific currency if it exists and writes the list to a file.
+     * */
     @Override
     public void saveExchangeRate(String date, CurrencyRate currency) {
         currencyRateList = repository.getExchangeRate(date);
         replaceCurrencyIfExist(currency, currencyRateList);
         repository.putExchangeRate(date, currencyRateList);
+    }
+
+    /**
+     * Extracts currencies from a file. Deletes a specific currency,
+     * if it exists, and writes the list to a file.
+     * Returns true if the currency has been deleted, and false if the currency hasn't been deleted
+     */
+    public boolean removeExchangeRate(String date, String currencyToRemove) {
+        currencyRateList = repository.getExchangeRate(date);
+        boolean isRemoved = removeIfExist(currencyToRemove, currencyRateList);
+        repository.putExchangeRate(date, currencyRateList);
+
+        return isRemoved;
     }
 
     /**
@@ -44,5 +61,23 @@ public class CurrencyRateService implements RateService {
         }
 
         currencyRateList.add(currency);
+    }
+
+    /**
+     * The method will remove the currency if it exists and return true.
+     * Otherwise, return false.
+     */
+    private boolean removeIfExist(String currencyToRemove, List<CurrencyRate> currencyRateList) {
+        int count = 0;
+
+        for (CurrencyRate currencyRate : currencyRateList) {
+            if (currencyRate.getCurrency().getCurrencyCode().equals(currencyToRemove)) {
+                currencyRateList.remove(count);
+                return true;
+            }
+            count++;
+        }
+
+        return false;
     }
 }

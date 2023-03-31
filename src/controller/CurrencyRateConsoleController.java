@@ -16,6 +16,11 @@ public class CurrencyRateConsoleController implements CurrencyRateController {
      * Maximum number of arguments in the putExchangeRate command
      */
     private final static int PUT_RATE_MAX_ARGUMENTS = 4;
+
+    /**
+     * Maximum number of arguments in the removeExchangeRate command
+     */
+    private final static int REMOVE_RATE_MAX_ARGUMENTS = 2;
     private final CurrencyRateService service;
     private final LocalCurrency localCurrency;
 
@@ -32,6 +37,7 @@ public class CurrencyRateConsoleController implements CurrencyRateController {
         try {
             switch (command) {
                 case "admin/putExchangeRate" -> putRate(argumentsList);
+                case "admin/removeExchangeRate" -> removeRate(argumentsList);
                 default -> throw new UnknownCommandException("Неизвестная команда");
             }
         } catch (ApplicationException ex) {
@@ -65,6 +71,25 @@ public class CurrencyRateConsoleController implements CurrencyRateController {
         );
 
         System.out.println("Запись сохранена");
+    }
+
+    /**
+     * Gets a list of arguments and remove currency from file if it exists.
+     */
+    private void removeRate(List<String> argumentsList) {
+        if (argumentsList.size() != REMOVE_RATE_MAX_ARGUMENTS)
+            throw new IncorrectCommandFormatException("Неверный формат команды");
+
+        if (!isDateFormatValid(argumentsList.get(0)))
+            throw new InvalidDateFormatException("Неверный формат даты");
+
+        if (!isCurrencyValid(argumentsList.get(1)))
+            throw new UnsupportedCurrencyException("Неподдерживаемая валюта");
+
+        if (service.removeExchangeRate(argumentsList.get(0), argumentsList.get(1)))
+            System.out.println("Успешное удаление");
+        else System.out.println("Записи не существует");
+
     }
 
     private boolean isDateFormatValid(String date) {

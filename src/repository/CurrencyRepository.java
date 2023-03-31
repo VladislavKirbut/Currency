@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class CurrencyRepository implements DataStoreRep {
+
     /**
      * Config contains properties of CurrencyRepository
      */
@@ -54,13 +55,13 @@ public class CurrencyRepository implements DataStoreRep {
                     String.valueOf(currency.getPurchaseRate())
             );
             csvLines.add(csvLine);
+        }
 
             try {
                 Files.write(createFullPath(date), csvLines, StandardCharsets.UTF_8);
             } catch (IOException exception) {
                 throw new UncheckedIOException(exception);
             }
-        }
     }
 
     /**
