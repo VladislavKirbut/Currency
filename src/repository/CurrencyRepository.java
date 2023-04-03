@@ -8,13 +8,12 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.*;
 
 public class CurrencyRepository implements DataStoreRep {
 
-    /**
-     * Config contains properties of CurrencyRepository
-     */
+    /** Config contains properties of CurrencyRepository */
     private final RepositoryConfiguration config;
 
     public CurrencyRepository(RepositoryConfiguration config) {
@@ -24,9 +23,11 @@ public class CurrencyRepository implements DataStoreRep {
     }
 
     /**
-     * createFullPath method adds a file to a specific directory if this file doesn't exist.
+     * Adds a file to a specific directory if this file doesn't exist.
+     * Params: date - date of exchange rate
+     * Throws: UncheckedIOException
      */
-    private Path createFullPath(String date) {
+    private Path createFullPath(LocalDate date) {
         Path filePath;
         try {
             String fileName = date + ".csv";
@@ -40,11 +41,13 @@ public class CurrencyRepository implements DataStoreRep {
     }
 
     /**
-     * Adds currency to a file with a specific date
-     * If this currency exists, it'll be overwritten
+     * Adds currency to a file with a specific date. If this currency exists, it'll be overwritten
+     * Params: date - date of exchange rate
+     *         currencyRateList - list of currency rates on a specific date
+     * Throws: UncheckedIOException
      */
     @Override
-    public void putExchangeRate(String date, List<CurrencyRate> currencyRateList) {
+    public void putExchangeRate(LocalDate date, List<CurrencyRate> currencyRateList) {
 
         List<String> csvLines = new ArrayList<>();
 
@@ -66,9 +69,11 @@ public class CurrencyRepository implements DataStoreRep {
 
     /**
      * Returns list of CurrencyRate from file.
+     * Params: date - date of exchange rate
+     * Throws: UncheckedIOException
      */
     @Override
-    public List<CurrencyRate> getExchangeRate(String date) {
+    public List<CurrencyRate> getExchangeRate(LocalDate date) {
         List<String> csvLines;
 
         try {
