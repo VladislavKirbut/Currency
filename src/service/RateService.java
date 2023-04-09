@@ -14,5 +14,5 @@ public interface RateService {
     boolean removeExchangeRate(LocalDate date, String currency);
 
     Map<String, CurrencyRate> getMap(LocalDate date);
-    BigDecimal exchange(LocalDate date, BigDecimal amount, Currency fromCurrency, Currency toCurrency, LocalCurrency localCurrency);
+    BigDecimal exchange(LocalDate date, BigDecimal amount, Currency fromCurrency, Currency targetCurrency, LocalCurrency localCurrency);
 }
