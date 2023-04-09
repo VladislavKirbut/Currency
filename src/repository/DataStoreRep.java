@@ -12,5 +12,5 @@ public interface DataStoreRep {
     void putExchangeRate(LocalDate date, Map<String, CurrencyRate> currencyRate);
     Map<String, CurrencyRate> getCurrencyRateMap(LocalDate date);
     BigDecimal exchangeRate(LocalDate date, BigDecimal amount,
-                 Currency fromCurrency, Currency toCurrency, LocalCurrency localCurrency);
+                 Currency fromCurrency, Currency targetCurrency, LocalCurrency localCurrency);
 }
