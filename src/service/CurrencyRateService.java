@@ -30,8 +30,8 @@ public class CurrencyRateService implements RateService {
     }
 
     /**
-     * Extracts currencies from a file. Deletes a specific currency,
-     * if it exists, and writes the list to a file.
+     * Gets currencies from a file. Deletes a specific currency,
+     * if it exists, and writes the map to a file.
      * Returns true if the currency has been deleted, and false if the currency hasn't been deleted
      * Params: date - date of currency rate
      *         currencyToRemove - currency to be deleted
@@ -46,7 +46,7 @@ public class CurrencyRateService implements RateService {
     }
 
     /**
-     * Returns a list of exchange rates
+     * Returns a map of exchange rates
      * Params: date - date of currency rate
      */
     @Override
@@ -55,8 +55,16 @@ public class CurrencyRateService implements RateService {
         return currencyRateMap;
     }
 
+    /**
+    * Calls exchangeCurrency method from the repository, passes parameters and performs the exchange
+    * Param: date - date of exchange rate
+    *         amount - amount of money in "fromCurrency" currency
+    *         fromCurrency - the currency for exchange
+    *         tragetCurrency - the currency for purchase
+    *         localCurrency - basic currency 
+    */
     @Override
-    public BigDecimal exchange(LocalDate date, BigDecimal amount, Currency fromCurrency, Currency toCurrency, LocalCurrency localCurrency) {
-        return repository.exchangeRate(date, amount, fromCurrency, toCurrency, localCurrency);
+    public BigDecimal exchange(LocalDate date, BigDecimal amount, Currency fromCurrency, Currency targetCurrency, LocalCurrency localCurrency) {
+        return repository.exchangeCurrency(date, amount, fromCurrency, targetCurrency, localCurrency);
     }
 }
