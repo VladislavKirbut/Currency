@@ -1,7 +1,7 @@
 package repository;
 
 import config.RepositoryConfiguration;
-import exceptions.CurrencyRateException;
+import exceptions.CurrencyDataException;
 import model.CurrencyRate;
 import model.LocalCurrency;
 
@@ -133,8 +133,8 @@ public class CurrencyRepository implements DataStoreRep {
             return amount;
       
         Map<String, CurrencyRate> exchangeRateMap = getCurrencyRateMap(date);
-        if (!exchangeRateMap.containsKey(fromCurrency.toString()) || !exchangeRate.containsKey(targetCurrency.toString()))
-            throw new CurrencyRateException("Данные о курсе валюты отсутствуют");
+        if (!exchangeRateMap.containsKey(fromCurrency.toString()) || !exchangeRateMap.containsKey(targetCurrency.toString()))
+            throw new CurrencyDataException("Данные о курсе валюты отсутствуют");
         
         BigDecimal purchaseRate;
         

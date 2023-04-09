@@ -11,6 +11,6 @@ import java.util.Map;
 public interface DataStoreRep {
     void putExchangeRate(LocalDate date, Map<String, CurrencyRate> currencyRate);
     Map<String, CurrencyRate> getCurrencyRateMap(LocalDate date);
-    BigDecimal exchangeRate(LocalDate date, BigDecimal amount,
+    BigDecimal exchangeCurrency(LocalDate date, BigDecimal amount,
                  Currency fromCurrency, Currency targetCurrency, LocalCurrency localCurrency);
 }
