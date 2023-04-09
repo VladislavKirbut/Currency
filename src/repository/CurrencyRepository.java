@@ -72,7 +72,7 @@ public class CurrencyRepository implements DataStoreRep {
     }
 
     /**
-     * Returns Map of CurrencyRate from file.
+     * Returns map of CurrencyRates from file.
      * Params: date - date of exchange rate
      * Throws: UncheckedIOException
      */
@@ -101,7 +101,7 @@ public class CurrencyRepository implements DataStoreRep {
     }
 
     /**
-     * Adds currency rate to map, if rate already exists, it'll be overwritten
+     * Adds currency rate to map. If the rate already exists, it'll be overwritten
      * Params: date - date of exchange rate
      *         currencyRate - rate on a specific date
      */
@@ -114,40 +114,43 @@ public class CurrencyRepository implements DataStoreRep {
         putExchangeRateMap(date, currencyRateMap);
     }
 
+    /**
+    * Allows you to exchange the amount of a certain currency (fromCurrency) for that specified in the parameters (targetCurrency).
+    * Params: date - date of exchange rate
+    *         amount - amount of money in "fromCurrency" currency
+    *         fromCurrency - the currency for exchange
+    *         tragetCurrency - the currency for purchase
+    *         localCurrency - basic currency
+    * Throws: CurrencyRateException - when currencies, passed to the parameters don't exist in the file with a specific date.
+    */
     @Override
-    public BigDecimal exchangeRate(LocalDate date, BigDecimal amount,
-                                   Currency fromCurrency, Currency toCurrency, LocalCurrency localCurrency) {
+    public BigDecimal exchangeCurrency(LocalDate date, BigDecimal amount, Currency fromCurrency, Currency targetCurrency, LocalCurrency localCurrency) {
 
         if (amount.compareTo(BigDecimal.ZERO) == 0)
             return BigDecimal.ZERO;
-
-        if (fromCurrency.equals(toCurrency))
+        
+        if (fromCurrency.equals(targetCurrency))
             return amount;
-
+      
         Map<String, CurrencyRate> exchangeRateMap = getCurrencyRateMap(date);
-        BigDecimal toCurrencyPurchaseRate = null;
-        BigDecimal fromCurrencySellingRate = null;
-
-        if (fromCurrency.equals(localCurrency.getLocalCurrency())) {
-            toCurrencyPurchaseRate = exchangeRateMap.get(toCurrency.toString()).getPurchaseRate();
-            return amount.divide(toCurrencyPurchaseRate, 10, RoundingMode.HALF_UP);
-        }
-
-        CurrencyRate startCurrency = exchangeRateMap.get(fromCurrency.toString());
-
-        if (startCurrency != null) {
-            fromCurrencySellingRate = startCurrency.getSellingRate();
-        } else {
+        if (!exchangeRateMap.containsKey(fromCurrency.toString()) || !exchangeRate.containsKey(targetCurrency.toString()))
             throw new CurrencyRateException("Данные о курсе валюты отсутствуют");
+        
+        BigDecimal purchaseRate;
+        
+        if (fromCurrency.equals(localCurrency.getLocalCurrency())) {
+            purchaseRate = exchangeRateMap.get(targetCurrency.toString()).getPurchaseRate();
+            return amount.divide(purchaseRate, 10, RoundingMode.HALF_UP);
         }
 
-        BigDecimal baseCurrency = amount.multiply(fromCurrencySellingRate);
+        BigDecimal sellingRate = exchangeRateMap.get(fromCurrency.toString()).getSellingRate();
+        BigDecimal baseCurrency = amount.multiply(sellingRate);
 
-        if (toCurrency.equals(localCurrency.getLocalCurrency()))
+        if (targetCurrency.equals(localCurrency.getLocalCurrency()))
             return baseCurrency;
 
-        toCurrencyPurchaseRate = exchangeRateMap.get(toCurrency.toString()).getPurchaseRate();
+        purchaseRate = exchangeRateMap.get(targetCurrency.toString()).getPurchaseRate();
 
-        return baseCurrency.divide(toCurrencyPurchaseRate, 10, RoundingMode.HALF_UP);
+        return baseCurrency.divide(purchaseRate, 10, RoundingMode.HALF_UP);
     }
 }
