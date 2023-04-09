@@ -9,6 +9,7 @@ import java.util.List;
 
 public class Application {
     public static void main(String[] args) {
+        // код поднятия контекста
         Currency envCurrency = Currency.getInstance(System.getenv("LOCAL_CURRENCY_CODE"));
         LocalCurrency localCurrency = new LocalCurrency(envCurrency);
 

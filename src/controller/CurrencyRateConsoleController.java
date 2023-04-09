@@ -9,9 +9,7 @@ import service.CurrencyRateService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Currency;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class CurrencyRateConsoleController implements CurrencyRateController {
 
@@ -44,7 +42,7 @@ public class CurrencyRateConsoleController implements CurrencyRateController {
                 case "admin/putExchangeRate" -> putRate(argumentsList);
                 case "admin/removeExchangeRate" -> removeRate(argumentsList);
                 case "listExchangeRates" -> getListExchangeRate(argumentsList);
-                case "exchange" -> exchange(argumentsList);
+                case "exchange" -> getExchangeRate(argumentsList);
                 default -> throw new UnknownCommandException("Неизвестная команда");
             }
         } catch (ApplicationException ex) {
@@ -67,11 +65,18 @@ public class CurrencyRateConsoleController implements CurrencyRateController {
                 isCurrencyValid(argumentsList.get(1)) && isPurchaseRateValid(argumentsList.get(2)) &&
                 isSellingRateValid(argumentsList.get(3))) {
 
+            CurrencyRate currencyRate = new CurrencyRate(
+                    Currency.getInstance(argumentsList.get(1)),
+                    new BigDecimal(argumentsList.get(3)),
+                    new BigDecimal(argumentsList.get(2))
+            );
+
+            Map<String, CurrencyRate> currencyMap = new HashMap<>();
+            currencyMap.put(String.valueOf(Currency.getInstance(argumentsList.get(1))), currencyRate);
+
             service.saveExchangeRate(
                     LocalDate.parse(argumentsList.get(0)),
-                    new CurrencyRate(Currency.getInstance(argumentsList.get(1)),
-                    new BigDecimal(argumentsList.get(3)),
-                    new BigDecimal(argumentsList.get(2)))
+                    currencyMap
             );
 
             System.out.println("Запись сохранена");
@@ -106,11 +111,11 @@ public class CurrencyRateConsoleController implements CurrencyRateController {
             throw new IncorrectCommandFormatException("Неверный формат команды");
 
         if (isDateFormatValid(argumentsList.get(0))) {
-            List<CurrencyRate> exchangeRateList = service.getList(LocalDate.parse(argumentsList.get(0)));
+            Map<String, CurrencyRate> exchangeRateMap = service.getMap(LocalDate.parse(argumentsList.get(0)));
 
-            if (exchangeRateList.size() == 0)
+            if (exchangeRateMap.size() == 0)
                 System.out.println("Данные отсутствуют");
-            else printRates(exchangeRateList);
+            else printRates(exchangeRateMap);
         }
     }
 
@@ -119,7 +124,7 @@ public class CurrencyRateConsoleController implements CurrencyRateController {
      * Params: argumentsList - list of arguments from a specific command
      * Throws: IncorrectCommandFormatException - if count of arguments don't match a specific command
      */
-    private void exchange(List<String> argumentsList) {
+    private void getExchangeRate(List<String> argumentsList) {
         if (argumentsList.size() != EXCHANGE_MAX_ARGUMENTS)
             throw new IncorrectCommandFormatException("Неверный формат команды");
 
@@ -127,8 +132,14 @@ public class CurrencyRateConsoleController implements CurrencyRateController {
                 isInitialAmountValueCorrect(argumentsList.get(1)) &&
                 isInitialCurrencyUnsupported(argumentsList.get(2), argumentsList.get(3))
         ) {
+            BigDecimal amount = new BigDecimal(String.valueOf(argumentsList.get(1)));
+            Currency fromCurrency = Currency.getInstance(argumentsList.get((2)));
+            Currency toCurrency = Currency.getInstance(argumentsList.get((3)));
 
+            BigDecimal result = service.exchange(LocalDate.parse(argumentsList.get(0)), amount, fromCurrency,
+                    toCurrency, localCurrency);
 
+            System.out.println(result);
         }
     }
 
@@ -214,13 +225,13 @@ public class CurrencyRateConsoleController implements CurrencyRateController {
      * Outputs all exchange rates to console
      * Params: currencyRateList - list of exchange rates from file with specific date
      */
-    private void printRates(List<CurrencyRate> currencyRateList) {
+    private void printRates(Map<String, CurrencyRate> currencyRateMap) {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%-10s %-10s %s\n", "Валюта", "Покупка", "Продажа"));
 
-        for (CurrencyRate currency : currencyRateList) {
-            sb.append(String.format("%-10s %-10.3s %.3s\n", currency.getCurrency(), currency.getPurchaseRate(),
-                             currency.getSellingRate()));
+        for (Map.Entry<String, CurrencyRate> entry : currencyRateMap.entrySet()) {
+            sb.append(String.format("%-10s %-10.3s %.3s\n", entry.getValue().getCurrency(), entry.getValue().getPurchaseRate(),
+                             entry.getValue().getSellingRate()));
         }
 
         System.out.println(sb);
@@ -247,9 +258,9 @@ public class CurrencyRateConsoleController implements CurrencyRateController {
      */
     private boolean isInitialAmountValueCorrect(String amount) {
         if (BigDecimal.valueOf(Double.parseDouble(amount)).compareTo(BigDecimal.ZERO) < 0)
-            return true;
+            throw new InputAmountValueException("Неверное значение исходной денежной суммы");
 
-        throw new InputAmountValueException("Неверное значение исходной денежной суммы");
+        return true;
     }
 
     /**

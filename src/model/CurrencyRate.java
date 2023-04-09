@@ -19,13 +19,13 @@ public class CurrencyRate {
      * Currency purchase rate
      */
     private final BigDecimal purchaseRate;
-    public CurrencyRate(Currency currency, BigDecimal sellingRate, BigDecimal purchaseRate) {
+    public CurrencyRate(Currency currency, BigDecimal purchaseRate, BigDecimal sellingRate) {
         if (currency == null || sellingRate.compareTo(BigDecimal.ZERO) <= 0 || purchaseRate.compareTo(BigDecimal.ZERO) <= 0)
             throw new IllegalArgumentException("Incorrect parameters of constructor.");
 
         this.currency = currency;
-        this.sellingRate = sellingRate;
         this.purchaseRate = purchaseRate;
+        this.sellingRate = sellingRate;
     }
     @Override
     public boolean equals(Object obj) {
